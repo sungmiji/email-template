@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스테이지나인 이메일 템플릿</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+  /* 탭 바 */
+  .tab-bar {
+    background: #fff; border-bottom: 1px solid #e8e8e8;
+    padding: 0 24px; display: flex; align-items: flex-end; gap: 2px;
+    height: 48px; position: sticky; top: 0; z-index: 100;
+  }
+  .tab {
+    border: none; background: none; cursor: pointer;
+    padding: 10px 20px 12px; font-size: 13.5px; font-weight: 600; color: #aaa;
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s; font-family: inherit;
+  }
+  .tab:hover { color: #555; }
+  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* 공통 레이아웃 */
+  .container { display: grid; grid-template-columns: 360px 1fr; gap: 0; min-height: calc(100vh - 48px); }
+  .panel { background: #fff; border-right: 1px solid #e8e8e8; padding: 28px 24px; overflow-y: auto; }
+  .panel-title { font-size: 15px; font-weight: 700; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #efefef; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%; border: 1.5px solid #e0e0e0; border-radius: 10px;
+    padding: 9px 12px; font-size: 13.5px; font-family: inherit;
+    outline: none; transition: border-color 0.15s; color: #1a1a1a;
+    background: #fff; appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px; cursor: pointer;
+  }
+  .field input, .field textarea { background-image: none; padding-right: 12px; cursor: text; }
+  .field input[type="date"] { cursor: pointer; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: #1a1a1a; }
+  .field textarea { resize: vertical; min-height: 60px; background-image: none; padding-right: 12px; }
+
+  .custom-type-input { margin-top: 8px; display: none; }
+  .date-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+  .date-sep { font-size: 13px; color: #999; text-align: center; white-space: nowrap; }
+  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+
+  /* 멀티셀렉트 */
+  .multi-select-wrapper { position: relative; }
+  .multi-select-trigger {
+    width: 100%; border: 1.5px solid #e0e0e0; border-radius: 10px;
+    padding: 8px 30px 8px 10px; font-size: 13.5px; font-family: inherit;
+    cursor: pointer; background: #fff; color: #1a1a1a;
+    min-height: 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+    transition: border-color 0.15s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    user-select: none;
+  }
+  .multi-select-trigger.open { border-color: #1a1a1a; border-radius: 10px 10px 0 0; }
+  .multi-select-panel {
+    display: none; border: 1.5px solid #1a1a1a; border-top: none;
+    border-radius: 0 0 10px 10px; background: #fff; overflow: hidden;
+  }
+  .multi-select-panel.open { display: block; }
+  .check-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; font-size: 13px; cursor: pointer; color: #1a1a1a;
+    transition: background 0.1s;
+  }
+  .check-item:hover { background: #f5f5f5; }
+  .check-item input[type="checkbox"] {
+    width: 15px !important; height: 15px !important; padding: 0 !important;
+    border: none !important; cursor: pointer !important; background-image: none !important;
+    padding-right: 0 !important; appearance: checkbox; -webkit-appearance: checkbox;
+    border-radius: 3px !important; flex-shrink: 0; accent-color: #1a1a1a;
+  }
+  .special-custom-row { padding: 8px 10px 10px; border-top: 1px solid #f0f0f0; }
+  .special-custom-row input {
+    flex: 1; border: 1.5px solid #e0e0e0 !important; border-radius: 8px !important;
+    padding: 7px 10px !important; font-size: 13px !important; outline: none !important;
+    color: #1a1a1a !important; background-image: none !important; padding-right: 10px !important;
+    cursor: text !important; min-width: 0 !important;
+  }
+  .special-custom-row input:focus { border-color: #1a1a1a !important; }
+  .special-add-row { display: flex; gap: 6px; align-items: center; }
+  .special-add-btn {
+    flex-shrink: 0; background: #1a1a1a; color: #fff; border: none;
+    border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s; white-space: nowrap;
+  }
+  .special-add-btn:hover { opacity: 0.7; }
+  .custom-tags-area { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .custom-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #e8e8e8; border-radius: 5px; padding: 2px 6px 2px 8px;
+    font-size: 11.5px; color: #1a1a1a;
+  }
+  .custom-tag-x {
+    cursor: pointer; font-size: 13px; line-height: 1; color: #888;
+    border: none; background: none; padding: 0; display: flex; align-items: center;
+  }
+  .custom-tag-x:hover { color: #1a1a1a; }
+  .ms-tag { display: inline-block; background: #efefef; border-radius: 5px; padding: 2px 8px; font-size: 11.5px; line-height: 1.6; color: #1a1a1a; }
+  .ms-placeholder { color: #aaa; font-size: 13.5px; }
+
+  /* 미리보기 공통 */
+  .preview-wrap { background: #f5f5f5; padding: 28px; overflow-y: auto; }
+  .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .preview-header span { font-size: 13px; font-weight: 700; color: #666; }
+  .copy-btn {
+    background: #1a1a1a; color: #fff; border: none; border-radius: 10px;
+    padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+  }
+  .copy-btn:hover { opacity: 0.75; }
+  .copy-btn.copied { background: #22c55e; }
+  .email-subject {
+    background: #fff; border-radius: 12px; padding: 14px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); max-width: 720px;
+    font-size: 14px; font-weight: 700; color: #1a1a1a;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .email-subject .subject-label {
+    font-size: 10px; font-weight: 700; color: #888; letter-spacing: 1px;
+    background: #f0f0f0; padding: 3px 7px; border-radius: 5px; white-space: nowrap;
+  }
+  .email-box {
+    background: #fff; border-radius: 16px; padding: 36px 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); max-width: 720px;
+    font-size: 14px; line-height: 1.85; color: #1a1a1a; word-break: break-word;
+  }
+  .email-box strong { font-weight: 700; }
+  .ep { margin: 0 0 14px 0; }
+
+  /* 계약 확정 전용 */
+  #page-contract .email-box { white-space: pre-wrap; max-width: 680px; }
+  .contract-box {
+    background: #f9f9f9; border: 1px solid #e8e8e8; border-radius: 12px;
+    padding: 18px 20px; margin: 6px 0; font-size: 13.5px; line-height: 2;
+  }
+
+  /* 입주안내 전용 */
+  .section-box {
+    background: #f9f9f9; border: 1px solid #e8e8e8; border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 10px; font-size: 14px; line-height: 1.85;
+  }
+
+  @media (max-width: 800px) {
+    .container { grid-template-columns: 1fr; }
+    .panel { border-right: none; border-bottom: 1px solid #e8e8e8; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 탭 바 -->
+<div class="tab-bar">
+  <button class="tab active" id="tab-contract" onclick="switchTab('contract')">계약 확정 이메일</button>
+  <button class="tab" id="tab-move" onclick="switchTab('move')">입주 안내 이메일</button>
+</div>
+
+<!-- ============================== PAGE 1: 계약 확정 이메일 ============================== -->
+<div id="page-contract" class="page active">
+  <div class="container">
+    <div class="panel">
+      <div class="panel-title">계약 정보 입력</div>
+
+      <div class="field">
+        <label>수신인 구분</label>
+        <select id="c_recipientType" onchange="c_toggleCustomType()">
+          <option value="대표님">대표님</option>
+          <option value="담당자님">담당자님</option>
+          <option value="__custom__">직접 입력</option>
+        </select>
+        <input type="text" id="c_customType" class="custom-type-input" placeholder="예) 팀장님, 원장님, 이사님" oninput="c_update()">
+      </div>
+
+      <div class="field">
+        <label>수신인 이름</label>
+        <input type="text" id="c_ceoName" placeholder="예) 홍길동 (없으면 비워두세요)" oninput="c_update()">
+      </div>
+
+      <div class="field">
+        <label>매니저 이름</label>
+        <select id="c_manager" onchange="c_update()">
+          <option value="">선택하세요</option>
+          <option value="장혜림">장혜림</option>
+          <option value="지성미">지성미</option>
+        </select>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>계약 호실</label>
+        <select id="c_room" onchange="c_update()">
+          <option value="">선택하세요</option>
+          <option value="S101호 (프라이빗데스크 1인실)">S101호 (프라이빗데스크 1인실)</option>
+          <option value="S102호 (프라이빗데스크 1인실)">S102호 (프라이빗데스크 1인실)</option>
+          <option value="S103호 (프라이빗데스크 1인실)">S103호 (프라이빗데스크 1인실)</option>
+          <option value="S104호 (프라이빗데스크 1인실)">S104호 (프라이빗데스크 1인실)</option>
+          <option value="S105호 (프라이빗데스크 1인실)">S105호 (프라이빗데스크 1인실)</option>
+          <option value="S106호 (프라이빗데스크 1인실)">S106호 (프라이빗데스크 1인실)</option>
+          <option value="301호 (창측 17인실)">301호 (창측 17인실)</option>
+          <option value="302,303호 (창측 13인실)">302,303호 (창측 13인실)</option>
+          <option value="304호 (창측 6인실)">304호 (창측 6인실)</option>
+          <option value="305호 (창측 3인실)">305호 (창측 3인실)</option>
+          <option value="306호 (창측 6인실)">306호 (창측 6인실)</option>
+          <option value="307호 (창측 3인실)">307호 (창측 3인실)</option>
+          <option value="308호 (창측 7인실)">308호 (창측 7인실)</option>
+          <option value="309호 (내측 4인실)">309호 (내측 4인실)</option>
+          <option value="310호 (내측 4인실)">310호 (내측 4인실)</option>
+          <option value="311호 (내측 4인실)">311호 (내측 4인실)</option>
+          <option value="313호 (내측 6인실)">313호 (내측 6인실)</option>
+          <option value="314호 (창측 12인실)">314호 (창측 12인실)</option>
+          <option value="315호 (창측 19인실)">315호 (창측 19인실)</option>
+          <option value="316호 (창측 10인실)">316호 (창측 10인실)</option>
+          <option value="317호 (창측 7인실)">317호 (창측 7인실)</option>
+          <option value="401호 (창측 17인실)">401호 (창측 17인실)</option>
+          <option value="402-1호 (프라이빗 데스크 1인실)">402-1호 (프라이빗 데스크 1인실)</option>
+          <option value="402-2호 (프라이빗 데스크 1인실)">402-2호 (프라이빗 데스크 1인실)</option>
+          <option value="402-3호 (프라이빗 데스크 1인실)">402-3호 (프라이빗 데스크 1인실)</option>
+          <option value="402-4호 (프라이빗 데스크 1인실)">402-4호 (프라이빗 데스크 1인실)</option>
+          <option value="402-5호 (프라이빗 데스크 1인실)">402-5호 (프라이빗 데스크 1인실)</option>
+          <option value="402-6호 (프라이빗 데스크 1인실)">402-6호 (프라이빗 데스크 1인실)</option>
+          <option value="402-7호 (프라이빗 데스크 1인실)">402-7호 (프라이빗 데스크 1인실)</option>
+          <option value="402-8호 (프라이빗 데스크 1인실)">402-8호 (프라이빗 데스크 1인실)</option>
+          <option value="403호 (창측 15인실)">403호 (창측 15인실)</option>
+          <option value="406호 (창측 9인실)">406호 (창측 9인실)</option>
+          <option value="409호 (내측 1인실)">409호 (내측 1인실)</option>
+          <option value="411호 (창측 12인실)">411호 (창측 12인실)</option>
+          <option value="412호 (창측 12인실)">412호 (창측 12인실)</option>
+          <option value="413호 (내측 12인실)">413호 (내측 12인실)</option>
+          <option value="414호 (창측 25인실)">414호 (창측 25인실)</option>
+          <option value="415호 (창측 5인실)">415호 (창측 5인실)</option>
+          <option value="416,417호 (창측 17인실)">416,417호 (창측 17인실)</option>
+          <option value="418호 (창측 8인실)">418호 (창측 8인실)</option>
+          <option value="419호 (창측 7인실)">419호 (창측 7인실)</option>
+          <option value="420호 (창측 8인실)">420호 (창측 8인실)</option>
+          <option value="421호 (내측 3인실)">421호 (내측 3인실)</option>
+          <option value="422호 (내측 3인실)">422호 (내측 3인실)</option>
+          <option value="501호 (창측 20인실)">501호 (창측 20인실)</option>
+          <option value="502호 (창측 6인실)">502호 (창측 6인실)</option>
+          <option value="503,504호 (창측 15인실)">503,504호 (창측 15인실)</option>
+          <option value="505호 (창측 6인실)">505호 (창측 6인실)</option>
+          <option value="506호 (창측 6인실)">506호 (창측 6인실)</option>
+          <option value="507호 (창측 6인실)">507호 (창측 6인실)</option>
+          <option value="508호 (창측 7인실)">508호 (창측 7인실)</option>
+          <option value="509호 (내측 4인실)">509호 (내측 4인실)</option>
+          <option value="510호 (내측 4인실)">510호 (내측 4인실)</option>
+          <option value="511호 (내측 4인실)">511호 (내측 4인실)</option>
+          <option value="512호 (창측 12인실)">512호 (창측 12인실)</option>
+          <option value="513호 (창측 12인실)">513호 (창측 12인실)</option>
+          <option value="514호 (창측 9인실)">514호 (창측 9인실)</option>
+          <option value="515호 (창측 13인실)">515호 (창측 13인실)</option>
+          <option value="516호 (창측 5인실)">516호 (창측 5인실)</option>
+          <option value="517호 (창측 6인실)">517호 (창측 6인실)</option>
+          <option value="518,519호 (창측 18인실)">518,519호 (창측 18인실)</option>
+          <option value="520호 (창측 6인실)">520호 (창측 6인실)</option>
+          <option value="521호 (창측 6인실)">521호 (창측 6인실)</option>
+          <option value="523호 (내측 3인실)">523호 (내측 3인실)</option>
+          <option value="524호 (내측 3인실)">524호 (내측 3인실)</option>
+          <option value="525호 (내측 2인실)">525호 (내측 2인실)</option>
+          <option value="526호 (내측 3인실)">526호 (내측 3인실)</option>
+          <option value="527호 (내측 2인실)">527호 (내측 2인실)</option>
+          <option value="528호 (내측 3인실)">528호 (내측 3인실)</option>
+          <option value="D101호 (프라이빗부스 1인실)">D101호 (프라이빗부스 1인실)</option>
+          <option value="D102호 (프라이빗부스 1인실)">D102호 (프라이빗부스 1인실)</option>
+          <option value="D103호 (프라이빗부스 1인실)">D103호 (프라이빗부스 1인실)</option>
+          <option value="D104호 (프라이빗부스 1인실)">D104호 (프라이빗부스 1인실)</option>
+          <option value="901호 (창측 80인실)">901호 (창측 80인실)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>계약 기간</label>
+        <div class="date-row">
+          <input type="date" id="c_dateStart" onchange="c_update()">
+          <span class="date-sep">~</span>
+          <input type="date" id="c_dateEnd" onchange="c_update()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>예치금</label>
+        <input type="text" id="c_deposit" placeholder="숫자만 입력" oninput="c_formatMoney(this); c_update()">
+      </div>
+
+      <div class="field">
+        <label>월 서비스이용료</label>
+        <input type="text" id="c_monthly" placeholder="숫자만 입력 (vat 별도)" oninput="c_formatMoney(this); c_update()">
+      </div>
+
+      <div class="field">
+        <label>특약 및 추가 납부 금액</label>
+        <div class="multi-select-wrapper">
+          <div class="multi-select-trigger" id="c_specialTrigger" onclick="c_toggleSpecial()">
+            <span class="ms-placeholder" id="c_specialSummary">선택하세요</span>
+          </div>
+          <div class="multi-select-panel" id="c_specialPanel">
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="첫 달 50% 렌트프리 프로모션" onchange="c_onSpecialChange()"> 첫 달 50% 렌트프리 프로모션</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="첫 달 렌트프리 프로모션" onchange="c_onSpecialChange()"> 첫 달 렌트프리 프로모션</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="마지막 달 50% 렌트프리 프로모션" onchange="c_onSpecialChange()"> 마지막 달 50% 렌트프리 프로모션</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="마지막 달 렌트프리 프로모션" onchange="c_onSpecialChange()"> 마지막 달 렌트프리 프로모션</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="월 주차 1대 무료 제공" onchange="c_onSpecialChange()"> 월 주차 1대 무료 제공</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="월 주차 1대 50% 할인 제공 (월 11만원, vat포함)" onchange="c_onSpecialChange()"> 월 주차 1대 50% 할인 제공 (월 11만원, vat포함)</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="월 회의실 크레딧 무료제공" onchange="c_onSpecialChange()"> 월 회의실 크레딧 무료제공</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="다음 재계약 시 이용료 동결 합의" onchange="c_onSpecialChange()"> 다음 재계약 시 이용료 동결 합의</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="다음 재계약 시 이용료 5% 이내 인상 합의" onchange="c_onSpecialChange()"> 다음 재계약 시 이용료 5% 이내 인상 합의</label>
+            <label class="check-item"><input type="checkbox" class="c_special_cb" value="단기계약으로 인한 예치금 면제" onchange="c_onSpecialChange()"> 단기계약으로 인한 예치금 면제</label>
+            <div class="special-custom-row">
+              <div class="custom-tags-area" id="c_customTagsArea"></div>
+              <div class="special-add-row">
+                <input type="text" id="c_specialCustomInput" placeholder="직접 입력 후 추가 버튼 또는 Enter" onkeydown="c_handleCustomKeydown(event)">
+                <button type="button" class="special-add-btn" onclick="c_addCustomSpecial()">추가</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>금일 총 입금금액</label>
+        <input type="text" id="c_total" placeholder="숫자만 입력" oninput="c_formatMoney(this); c_update()">
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-header">
+        <span>이메일 미리보기</span>
+        <button class="copy-btn" id="c_copyBtn" onclick="c_copyEmail()">복사하기</button>
+      </div>
+      <div class="email-subject">
+        <span class="subject-label">제목</span>
+        <span id="c_subjectText"></span>
+      </div>
+      <div class="email-box" id="c_preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PAGE 2: 입주 안내 이메일 ============================== -->
+<div id="page-move" class="page">
+  <div class="container">
+    <div class="panel">
+      <div class="panel-title">입주 안내 이메일</div>
+
+      <div class="field">
+        <label>수신인 구분</label>
+        <select id="m_recipientType" onchange="m_update()">
+          <option value="대표님">대표님</option>
+          <option value="담당자님">담당자님</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>수신인 이름</label>
+        <input type="text" id="m_recipientName" placeholder="예) 홍길동 (없으면 비워두세요)" oninput="m_update()">
+      </div>
+
+      <div class="field">
+        <label>매니저 이름</label>
+        <select id="m_manager" onchange="m_update()">
+          <option value="">선택하세요</option>
+          <option value="장혜림">장혜림</option>
+          <option value="지성미">지성미</option>
+        </select>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>인보이스 월</label>
+        <select id="m_invoiceMonth" onchange="m_update()">
+          <option value="">선택하세요</option>
+          <option value="1">1월</option>
+          <option value="2">2월</option>
+          <option value="3">3월</option>
+          <option value="4">4월</option>
+          <option value="5">5월</option>
+          <option value="6">6월</option>
+          <option value="7">7월</option>
+          <option value="8">8월</option>
+          <option value="9">9월</option>
+          <option value="10">10월</option>
+          <option value="11">11월</option>
+          <option value="12">12월</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>인보이스 발행일</label>
+        <input type="date" id="m_invoiceDate" onchange="m_update()">
+      </div>
+
+      <div class="field">
+        <label>발행 여부</label>
+        <select id="m_invoiceStatus" onchange="m_update()">
+          <option value="발행되었습니다">발행되었습니다</option>
+          <option value="발행 예정입니다">발행 예정입니다</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>입금 기한</label>
+        <input type="date" id="m_paymentDeadline" onchange="m_update()">
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>월 정기주차</label>
+        <select id="m_parkingInclude" onchange="m_toggleParking(); m_update()">
+          <option value="no">포함 안함</option>
+          <option value="yes">포함</option>
+        </select>
+      </div>
+
+      <div class="field" id="m_parkingDateField" style="display:none;">
+        <label>주차 서류 제출 기한</label>
+        <input type="date" id="m_parkingDeadline" onchange="m_update()">
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>멤버스 앱 가입 기한</label>
+        <input type="date" id="m_membershipDeadline" onchange="m_update()">
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label>연락처</label>
+        <select id="m_phone" onchange="m_update()">
+          <option value="010-2361-1523">010-2361-1523</option>
+          <option value="010-6701-1523">010-6701-1523</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-header">
+        <span>이메일 미리보기</span>
+        <button class="copy-btn" id="m_copyBtn" onclick="m_copyEmail()">복사하기</button>
+      </div>
+      <div class="email-subject">
+        <span class="subject-label">제목</span>
+        <span id="m_subjectText"></span>
+      </div>
+      <div class="email-box" id="m_preview"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========== 탭 전환 ========== */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('page-' + tab).classList.add('active');
+}
+
+/* ========== 계약 확정 이메일 ========== */
+let c_specialCustomItems = [];
+
+function c_val(id) { return document.getElementById(id).value.trim(); }
+
+function c_formatMoney(input) {
+  const raw = input.value.replace(/[^0-9]/g, '');
+  const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  input.value = formatted ? formatted + '원' : '';
+  const pos = input.value.length - (input.value.endsWith('원') ? 1 : 0);
+  input.setSelectionRange(pos, pos);
+}
+
+function c_getMoneyVal(id) {
+  const v = c_val(id).replace(/,/g, '').replace('원', '').trim();
+  if (!v) return '';
+  return v.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+}
+
+function c_formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = d.getMonth() + 1;
+  const dd = d.getDate();
+  return `${yy}년 ${mm}월 ${dd}일`;
+}
+
+function c_calcDuration(startStr, endStr) {
+  if (!startStr || !endStr) return '';
+  const s = new Date(startStr + 'T00:00:00');
+  const e = new Date(endStr + 'T00:00:00');
+  if (e < s) return '';
+  const sy = s.getFullYear(), sm = s.getMonth(), sd = s.getDate();
+  const ey = e.getFullYear(), em = e.getMonth(), ed = e.getDate();
+  const lastOfStart = new Date(sy, sm + 1, 0).getDate();
+  const lastOfEnd   = new Date(ey, em + 1, 0).getDate();
+  if (sy === ey && sm === em) {
+    if (sd === 1 && ed === lastOfStart) return ' (1개월)';
+    return ` (${ed - sd + 1}일)`;
+  }
+  const partialStart = sd === 1 ? 0 : (lastOfStart - sd + 1);
+  let fsY = sy, fsM = sm;
+  if (sd !== 1) { fsM++; if (fsM > 11) { fsM = 0; fsY++; } }
+  const partialEnd = ed === lastOfEnd ? 0 : ed;
+  let feY = ey, feM = em;
+  if (ed !== lastOfEnd) { feM--; if (feM < 0) { feM = 11; feY--; } }
+  const months    = Math.max(0, (feY - fsY) * 12 + (feM - fsM) + 1);
+  const totalDays = partialStart + partialEnd;
+  if (months > 0 && totalDays > 0) return ` (${months}개월 ${totalDays}일)`;
+  if (months > 0) return ` (${months}개월)`;
+  if (totalDays > 0) return ` (${totalDays}일)`;
+  return '';
+}
+
+function c_getPeriod() {
+  const s = c_val('c_dateStart');
+  const e = c_val('c_dateEnd');
+  if (s && e) return `${c_formatDate(s)} ~ ${c_formatDate(e)}${c_calcDuration(s, e)}`;
+  if (s) return `${c_formatDate(s)} ~ (종료일 선택)`;
+  if (e) return `(시작일 선택) ~ ${c_formatDate(e)}`;
+  return '(기간 선택)';
+}
+
+function c_getSpecialItems() {
+  const checked = [...document.querySelectorAll('.c_special_cb:checked')].map(cb => cb.value);
+  return [...checked, ...c_specialCustomItems];
+}
+
+function c_addCustomSpecial() {
+  const input = document.getElementById('c_specialCustomInput');
+  const text = input.value.trim();
+  if (!text) return;
+  c_specialCustomItems.push(text);
+  input.value = '';
+  c_renderCustomTags();
+  c_onSpecialChange();
+}
+
+function c_removeCustomSpecial(idx) {
+  c_specialCustomItems.splice(idx, 1);
+  c_renderCustomTags();
+  c_onSpecialChange();
+}
+
+function c_renderCustomTags() {
+  const area = document.getElementById('c_customTagsArea');
+  area.innerHTML = c_specialCustomItems.map((t, i) =>
+    `<span class="custom-tag">${t}<button class="custom-tag-x" onclick="c_removeCustomSpecial(${i})" type="button">×</button></span>`
+  ).join('');
+}
+
+function c_handleCustomKeydown(e) {
+  if (e.key === 'Enter') { e.preventDefault(); c_addCustomSpecial(); }
+}
+
+function c_getSpecial() {
+  const items = c_getSpecialItems();
+  return items.length ? items.join(', ') : '-';
+}
+
+function c_getRecipient() {
+  const sel = document.getElementById('c_recipientType');
+  let type;
+  if (sel.value === '__custom__') {
+    type = document.getElementById('c_customType').value.trim() || '담당자님';
+  } else {
+    type = sel.value || '대표님';
+  }
+  const name = c_val('c_ceoName');
+  const label = name ? `${name} ${type}` : type;
+  return { type, name, label };
+}
+
+function c_toggleCustomType() {
+  const sel = document.getElementById('c_recipientType');
+  const customInput = document.getElementById('c_customType');
+  if (sel.value === '__custom__') {
+    customInput.style.display = 'block';
+    customInput.focus();
+  } else {
+    customInput.style.display = 'none';
+    customInput.value = '';
+  }
+  c_update();
+}
+
+function c_toggleSpecial() {
+  const trigger = document.getElementById('c_specialTrigger');
+  const panel = document.getElementById('c_specialPanel');
+  const isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+    trigger.classList.remove('open');
+  } else {
+    panel.classList.add('open');
+    trigger.classList.add('open');
+  }
+}
+
+function c_onSpecialChange() {
+  c_updateSpecialTrigger();
+  c_update();
+}
+
+function c_updateSpecialTrigger() {
+  const items = c_getSpecialItems();
+  const summary = document.getElementById('c_specialSummary');
+  if (items.length === 0) {
+    summary.outerHTML = '<span class="ms-placeholder" id="c_specialSummary">선택하세요</span>';
+  } else {
+    const tagsHtml = items.map(t => `<span class="ms-tag">${t}</span>`).join('');
+    summary.outerHTML = `<span id="c_specialSummary" style="display:flex;flex-wrap:wrap;gap:4px;">${tagsHtml}</span>`;
+  }
+}
+
+function c_update() {
+  const { label } = c_getRecipient();
+  const manager = c_val('c_manager') || 'OOO';
+  const room    = c_val('c_room')    || '(호실 선택)';
+  const period  = c_getPeriod();
+  const deposit = c_getMoneyVal('c_deposit') || '(예치금 입력)';
+  const monthly = (c_getMoneyVal('c_monthly') ? c_getMoneyVal('c_monthly') + ' (vat 별도)' : '(월 이용료 입력)');
+  const special = c_getSpecial();
+  const total   = c_getMoneyVal('c_total') || '(입금액 입력)';
+
+  document.getElementById('c_subjectText').textContent = `[STAGE9] ${label}, 스테이지나인 삼성점 계약 안내드립니다.`;
+
+  document.getElementById('c_preview').innerHTML =
+`안녕하세요, ${label}!
+
+스테이지나인 ${manager} 매니저입니다.
+
+우선 빠르게 계약 결정해주셔서 감사하다는 말씀드립니다.
+
+계약에 필요한 서류 안내드립니다.
+
+<strong>※ 대리인(임직원 대리 계약 시) 신청 시 추가 제출서류 :
+  ① 위임장 (첨부파일, 법인인감날인 필수)
+  ② 대리인 신분증 사본
+  ③ 대리인 재직증명서</strong>
+
+1. 대표자 신분증 사본 (사업자등록증 내 표기된 대표님)
+2. 대표자 이메일 주소 (전자계약서 송부용, 날인 필요)
+3. 대표자 연락처
+4. 사업자등록증 사본
+5. 법인등기부등본 사본
+6. 법인인감증명서 사본
+7. 예치금 반환을 위한 법인 통장사본
+8. 인보이스 및 세금계산서 수령 메일주소
+
+위 서류 메일로 회신 주시면 감사하겠습니다.
+
+추가로 계약 조건 안내드립니다.
+<div class="contract-box">- <strong>계약 호실 :</strong> ${room}
+- <strong>계약 기간 :</strong> ${period}
+- <strong>예치금 :</strong> ${deposit}
+- <strong>월 서비스이용료 :</strong> ${monthly}
+- <strong>특약 및 추가 납부 금액 :</strong> ${special}
+- <strong>금일 총 입금금액 :</strong> ${total}</div>
+계약 확정을 원하시는 경우, 첨부한 스테이지나인 통장 사본 계좌로 상기 금액 입금 부탁드리며, 입금 확인 후 호실 홀딩이 진행됩니다.
+
+계약 개시일 이전 계약 해지 시, 전체 계약기간 총 이용료(vat 포함)의 10%를 입금 금액에서 공제합니다. (계약금의 성격)
+
+<strong>계약 서류 회신 주시면 전자 계약서 작성 후 메일로 발송드리겠습니다 😊</strong>
+
+궁금하신 사항 있으시면 편하게 연락 부탁드립니다!
+
+감사합니다.`;
+}
+
+function c_copyEmail() {
+  const { label } = c_getRecipient();
+  const manager = c_val('c_manager') || 'OOO';
+  const room    = c_val('c_room')    || '(호실 선택)';
+  const period  = c_getPeriod();
+  const deposit = c_getMoneyVal('c_deposit') || '(예치금 입력)';
+  const monthly = (c_getMoneyVal('c_monthly') ? c_getMoneyVal('c_monthly') + ' (vat 별도)' : '(월 이용료 입력)');
+  const special = c_getSpecial();
+  const total   = c_getMoneyVal('c_total') || '(입금액 입력)';
+
+  const S = 'font-family:Arial,sans-serif;font-size:14px;line-height:1.85;color:#1a1a1a;';
+  const html = `<html><body style="${S}">
+안녕하세요, ${label}!<br><br>
+스테이지나인 ${manager} 매니저입니다.<br><br>
+우선 빠르게 계약 결정해주셔서 감사하다는 말씀드립니다.<br><br>
+계약에 필요한 서류 안내드립니다.<br><br>
+<b>※ 대리인(임직원 대리 계약 시) 신청 시 추가 제출서류 :<br>
+&nbsp;&nbsp;① 위임장 (첨부파일, 법인인감날인 필수)<br>
+&nbsp;&nbsp;② 대리인 신분증 사본<br>
+&nbsp;&nbsp;③ 대리인 재직증명서</b><br><br>
+1. 대표자 신분증 사본 (사업자등록증 내 표기된 대표님)<br>
+2. 대표자 이메일 주소 (전자계약서 송부용, 날인 필요)<br>
+3. 대표자 연락처<br>
+4. 사업자등록증 사본<br>
+5. 법인등기부등본 사본<br>
+6. 법인인감증명서 사본<br>
+7. 예치금 반환을 위한 법인 통장사본<br>
+8. 인보이스 및 세금계산서 수령 메일주소<br><br>
+위 서류 메일로 회신 주시면 감사하겠습니다.<br><br>
+추가로 계약 조건 안내드립니다.<br>
+<table style="background:#f9f9f9;border:1px solid #e0e0e0;border-collapse:collapse;width:100%;max-width:520px;margin:8px 0 16px 0;">
+  <tr><td style="padding:16px 20px;font-family:Arial,sans-serif;font-size:14px;line-height:2.2;">
+    - <b>계약 호실 :</b> ${room}<br>
+    - <b>계약 기간 :</b> ${period}<br>
+    - <b>예치금 :</b> ${deposit}<br>
+    - <b>월 서비스이용료 :</b> ${monthly}<br>
+    - <b>특약 및 추가 납부 금액 :</b> ${special}<br>
+    - <b>금일 총 입금금액 :</b> ${total}
+  </td></tr>
+</table>
+계약 확정을 원하시는 경우, 첨부한 스테이지나인 통장 사본 계좌로 상기 금액 입금 부탁드리며, 입금 확인 후 호실 홀딩이 진행됩니다.<br><br>
+계약 개시일 이전 계약 해지 시, 전체 계약기간 총 이용료(vat 포함)의 10%를 입금 금액에서 공제합니다. (계약금의 성격)<br><br>
+<b>계약 서류 회신 주시면 전자 계약서 작성 후 메일로 발송드리겠습니다 😊</b><br><br>
+궁금하신 사항 있으시면 편하게 연락 부탁드립니다!<br><br>
+감사합니다.
+</body></html>`;
+
+  try {
+    const item = new ClipboardItem({
+      'text/html':  new Blob([html],  { type: 'text/html' }),
+      'text/plain': new Blob([document.getElementById('c_preview').innerText], { type: 'text/plain' })
+    });
+    navigator.clipboard.write([item]).then(() => showCopied('c_copyBtn'));
+  } catch {
+    navigator.clipboard.writeText(document.getElementById('c_preview').innerText).then(() => showCopied('c_copyBtn'));
+  }
+}
+
+/* ========== 입주 안내 이메일 ========== */
+function m_val(id) { return document.getElementById(id).value.trim(); }
+
+function m_formatShortDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+}
+
+function m_getRecipient() {
+  const type = m_val('m_recipientType') || '대표님';
+  const name = m_val('m_recipientName');
+  const label = name ? `${name} ${type}` : type;
+  return { type, name, label };
+}
+
+function m_toggleParking() {
+  document.getElementById('m_parkingDateField').style.display =
+    m_val('m_parkingInclude') === 'yes' ? '' : 'none';
+}
+
+function m_getVars() {
+  const { label } = m_getRecipient();
+  return {
+    label,
+    manager:            m_val('m_manager')                              || 'OOO',
+    invoiceMonth:       m_val('m_invoiceMonth')                         || 'O',
+    invoiceDate:        m_formatShortDate(m_val('m_invoiceDate'))       || 'O월 OO일',
+    invoiceStatus:      m_val('m_invoiceStatus')                        || '발행되었습니다',
+    paymentDeadline:    m_formatShortDate(m_val('m_paymentDeadline'))   || 'O월 O일',
+    parkingInclude:     m_val('m_parkingInclude') === 'yes',
+    parkingDeadline:    m_formatShortDate(m_val('m_parkingDeadline'))   || 'O월 O일',
+    membershipDeadline: m_formatShortDate(m_val('m_membershipDeadline')) || 'O월 OO일',
+    phone:              m_val('m_phone')                                || '010-2361-1523',
+  };
+}
+
+function mSB(content) { return `<div class="section-box">${content}</div>`; }
+function mP(text)     { return `<p class="ep">${text}</p>`; }
+
+function m_update() {
+  const v = m_getVars();
+
+  document.getElementById('m_subjectText').textContent =
+    `[STAGE9] ${v.label}, 스테이지나인 삼성점 입주 안내드립니다.`;
+
+  const parkingBox = v.parkingInclude ? mSB(
+    `<strong>- 월 정기 주차 등록을 위한 서류 제출 요청</strong><br>` +
+    `입주 전 월 정기주차 사전 등록을 위하여 <strong>${v.parkingDeadline}까지 차량 정보 전달 요청</strong>드립니다. (차량 번호, 차주명, 차주 연락처)<br>` +
+    `주차 이용료는 매월 인보이스에 추가되어 발행됩니다.`
+  ) : '';
+
+  let html = '';
+  html += mP(`안녕하세요 ${v.label}, 스테이지나인 ${v.manager} 매니저입니다.`);
+  html += mP(`삼성점 오피스 입주 안내 드립니다.`);
+  html += `<br>`;
+  html += mSB(
+    `<strong>- ${v.invoiceMonth}월 인보이스 발행 및 서비스이용료 입금 안내</strong><br>` +
+    `${v.invoiceMonth}월 서비스이용료에 대한 인보이스는 ${v.invoiceDate}에 ${v.invoiceStatus}.<br>` +
+    `확인 후 <strong>${v.paymentDeadline} 전까지 이용료 입금 부탁드립니다.</strong><br>` +
+    `이용료 입금이 확인되지 않을 경우 입주가 불가하오니, 확인하시어 사전 입금 부탁드립니다 😊<br>` +
+    `추후 이용료는 전월 26일~말일까지 납부가 완료되어야 합니다.<br>` +
+    `이용료 입금시에는 <strong>계약하신 기업명</strong>으로 입금 부탁드립니다.<br>` +
+    `세금계산서는 매월(이용월) 1일 발행되오니, 참고 부탁드립니다.`
+  );
+  html += parkingBox;
+  html += mSB(
+    `<strong>- 입주 투어 일시 회신 요청</strong><br>` +
+    `스테이지나인 삼성점은 외부인 출입이 불가하여 이사 및 입주 전 출입 등록이 필요하며,<br>` +
+    `첫 입주일에 전반적인 시설 사용 등을 안내하는 입주 투어를 진행하고 있습니다.<br>` +
+    `원활한 출입 등록 및 입주 투어를 위하여 <strong>입주 원하시는 날짜와 시간을 지정하시어 사전 회신</strong> 부탁드립니다.<br>` +
+    `(입주투어 일시는 평일 10:00-18:00내에 지정 가능하며, 대표님 포함 2인 이하로 구성 부탁드립니다.)`
+  );
+  html += mSB(
+    `<strong>- 전대동의서, 사업자등록증 제공 안내</strong><br>` +
+    `전대동의서 및 사업자등록증 제공이 가능하오니, 필요하실 경우 회신 부탁드립니다.<br>` +
+    `추가로, 사업자 등록 후 스테이지나인 삼성점 메일로 주소지 변경된 사업자등록증 발송 부탁드립니다.<br>` +
+    `*ss_support@stage9.co.kr`
+  );
+  html += mSB(
+    `<strong>- 이사 안내</strong><br>` +
+    `이삿짐이 많을 경우, 이사 진행을 위한 엘리베이터의 별도 예약이 필요합니다.<br>` +
+    `예약 가능 시간 확인 후 회신 주시면, 화물 엘리베이터 예약 도와드리겠습니다.<br>` +
+    `- 예약 가능 시간 : 평일 10:30~11:30 / 14:30~16:30 / 20:00<br>` +
+    `- 1톤 트럭 미만, 2.1M 높이 제한 (탑차 불가)<br>` +
+    `- 주차 : 지하 5층 주차장<br>` +
+    `- 화물 엘리베이터 예약 시, 예약 시간에 맞춰 이용이 가능하며, 일반 승강기 이용은 불가합니다.<br>` +
+    `(긁힘 또는 찍힘 발생 시 비용이 청구될 수 있으니, 이 점 참고 부탁드립니다.)`
+  );
+  html += mSB(
+    `<strong>- 이사 필수 안내 사항</strong><br>` +
+    `직접 이사하시는 경우 아래 사항 진행 부탁드리며, <strong>이사 업체를 이용하시는 경우에는 이사 업체에 전달 부탁드립니다.</strong><br>` +
+    `- 이사 시 화물엘리베이터 문, 문틀 모두 보양 안내 필수 부탁드립니다. (미보양 시 이사 진행 불가 및 찍힘, 스크래치 비용 청구)<br>` +
+    `- 이사 시 반드시 화물엘리베이터만 이용이 가능하며, 일반 승강기 이용은 불가합니다.`
+  );
+  html += mSB(
+    `<strong>- 스테이지나인 멤버스 앱 다운로드 및 멤버 가이드 안내</strong><br>` +
+    `스테이지나인 멤버스 전용 회원가입 링크를 ${v.label} 메일로 송부드렸습니다.<br>` +
+    `해당 링크로 직원 분들 모두 <strong>회원가입</strong>이 되어야 입주일에 출입을 위한 지문 등록이 가능하여<br>` +
+    `<strong>${v.membershipDeadline}전까지 필수로 가입 진행</strong>부탁드립니다.`
+  );
+  html += mSB(
+    `<strong>- 사무실 레이아웃 요청</strong><br>` +
+    `입주 전 사무실 레이아웃 변경 및 가구 반출이 가능합니다.<br>` +
+    `인실 크기 별로 기본값이 세팅되며, 기본 레이아웃 도면 첨부드리니 가구 반출이 필요하실 경우 미리 말씀 부탁드립니다.<br>` +
+    `입주 이후 반출비용은 아래와 같이 발생되오니, 이 점 참고 부탁드립니다.<br>` +
+    `(책상 : 30,000원, 의자,서랍 : 25,000원) _ ea`
+  );
+  html += `<br>`;
+  html += mP(`추가 문의 사항 및 제출 서류는 본 메일 혹은 ${v.phone}으로 회신 부탁드립니다.`);
+  html += `<p style="margin:0;">감사합니다.</p>`;
+
+  document.getElementById('m_preview').innerHTML = html;
+}
+
+function m_copyEmail() {
+  const v = m_getVars();
+  const F = 'font-family:Arial,sans-serif;font-size:14px;line-height:1.85;color:#1a1a1a;';
+  const pS = `${F}margin:0 0 14px 0;`;
+  const boxS = `width:100%;border-collapse:collapse;background:#f9f9f9;border:1px solid #e0e0e0;`;
+  const cellS = `${F}padding:16px 20px;`;
+
+  function CB(content) {
+    return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="${boxS}"><tr><td style="${cellS}">${content}</td></tr></table><br>`;
+  }
+
+  const parkingCopyBox = v.parkingInclude ? CB(
+    `<b>- 월 정기 주차 등록을 위한 서류 제출 요청</b><br>` +
+    `입주 전 월 정기주차 사전 등록을 위하여 <b>${v.parkingDeadline}까지 차량 정보 전달 요청</b>드립니다. (차량 번호, 차주명, 차주 연락처)<br>` +
+    `주차 이용료는 매월 인보이스에 추가되어 발행됩니다.`
+  ) : '';
+
+  const html =
+    `<html><head><meta charset="UTF-8"></head><body>` +
+    `<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="${F}padding:0;">` +
+    `<p style="${pS}">안녕하세요 ${v.label}, 스테이지나인 ${v.manager} 매니저입니다.</p>` +
+    `<p style="${pS}">삼성점 오피스 입주 안내 드립니다.</p><br>` +
+    CB(
+      `<b>- ${v.invoiceMonth}월 인보이스 발행 및 서비스이용료 입금 안내</b><br>` +
+      `${v.invoiceMonth}월 서비스이용료에 대한 인보이스는 ${v.invoiceDate}에 ${v.invoiceStatus}.<br>` +
+      `확인 후 <b>${v.paymentDeadline} 전까지 이용료 입금 부탁드립니다.</b><br>` +
+      `이용료 입금이 확인되지 않을 경우 입주가 불가하오니, 확인하시어 사전 입금 부탁드립니다 😊<br>` +
+      `추후 이용료는 전월 26일~말일까지 납부가 완료되어야 합니다.<br>` +
+      `이용료 입금시에는 <b>계약하신 기업명</b>으로 입금 부탁드립니다.<br>` +
+      `세금계산서는 매월(이용월) 1일 발행되오니, 참고 부탁드립니다.`
+    ) +
+    parkingCopyBox +
+    CB(
+      `<b>- 입주 투어 일시 회신 요청</b><br>` +
+      `스테이지나인 삼성점은 외부인 출입이 불가하여 이사 및 입주 전 출입 등록이 필요하며,<br>` +
+      `첫 입주일에 전반적인 시설 사용 등을 안내하는 입주 투어를 진행하고 있습니다.<br>` +
+      `원활한 출입 등록 및 입주 투어를 위하여 <b>입주 원하시는 날짜와 시간을 지정하시어 사전 회신</b> 부탁드립니다.<br>` +
+      `(입주투어 일시는 평일 10:00-18:00내에 지정 가능하며, 대표님 포함 2인 이하로 구성 부탁드립니다.)`
+    ) +
+    CB(
+      `<b>- 전대동의서, 사업자등록증 제공 안내</b><br>` +
+      `전대동의서 및 사업자등록증 제공이 가능하오니, 필요하실 경우 회신 부탁드립니다.<br>` +
+      `추가로, 사업자 등록 후 스테이지나인 삼성점 메일로 주소지 변경된 사업자등록증 발송 부탁드립니다.<br>` +
+      `*ss_support@stage9.co.kr`
+    ) +
+    CB(
+      `<b>- 이사 안내</b><br>` +
+      `이삿짐이 많을 경우, 이사 진행을 위한 엘리베이터의 별도 예약이 필요합니다.<br>` +
+      `예약 가능 시간 확인 후 회신 주시면, 화물 엘리베이터 예약 도와드리겠습니다.<br>` +
+      `- 예약 가능 시간 : 평일 10:30~11:30 / 14:30~16:30 / 20:00<br>` +
+      `- 1톤 트럭 미만, 2.1M 높이 제한 (탑차 불가)<br>` +
+      `- 주차 : 지하 5층 주차장<br>` +
+      `- 화물 엘리베이터 예약 시, 예약 시간에 맞춰 이용이 가능하며, 일반 승강기 이용은 불가합니다.<br>` +
+      `(긁힘 또는 찍힘 발생 시 비용이 청구될 수 있으니, 이 점 참고 부탁드립니다.)`
+    ) +
+    CB(
+      `<b>- 이사 필수 안내 사항</b><br>` +
+      `직접 이사하시는 경우 아래 사항 진행 부탁드리며, <b>이사 업체를 이용하시는 경우에는 이사 업체에 전달 부탁드립니다.</b><br>` +
+      `- 이사 시 화물엘리베이터 문, 문틀 모두 보양 안내 필수 부탁드립니다. (미보양 시 이사 진행 불가 및 찍힘, 스크래치 비용 청구)<br>` +
+      `- 이사 시 반드시 화물엘리베이터만 이용이 가능하며, 일반 승강기 이용은 불가합니다.`
+    ) +
+    CB(
+      `<b>- 스테이지나인 멤버스 앱 다운로드 및 멤버 가이드 안내</b><br>` +
+      `스테이지나인 멤버스 전용 회원가입 링크를 ${v.label} 메일로 송부드렸습니다.<br>` +
+      `해당 링크로 직원 분들 모두 <b>회원가입</b>이 되어야 입주일에 출입을 위한 지문 등록이 가능하여<br>` +
+      `<b>${v.membershipDeadline}전까지 필수로 가입 진행</b>부탁드립니다.`
+    ) +
+    CB(
+      `<b>- 사무실 레이아웃 요청</b><br>` +
+      `입주 전 사무실 레이아웃 변경 및 가구 반출이 가능합니다.<br>` +
+      `인실 크기 별로 기본값이 세팅되며, 기본 레이아웃 도면 첨부드리니 가구 반출이 필요하실 경우 미리 말씀 부탁드립니다.<br>` +
+      `입주 이후 반출비용은 아래와 같이 발생되오니, 이 점 참고 부탁드립니다.<br>` +
+      `(책상 : 30,000원, 의자,서랍 : 25,000원) _ ea`
+    ) +
+    `<p style="${pS}">추가 문의 사항 및 제출 서류는 본 메일 혹은 ${v.phone}으로 회신 부탁드립니다.</p>` +
+    `<p style="margin:0;${F}">감사합니다.</p>` +
+    `</td></tr></table></body></html>`;
+
+  try {
+    const item = new ClipboardItem({
+      'text/html':  new Blob([html],  { type: 'text/html' }),
+      'text/plain': new Blob([document.getElementById('m_preview').innerText], { type: 'text/plain' })
+    });
+    navigator.clipboard.write([item]).then(() => showCopied('m_copyBtn'));
+  } catch {
+    navigator.clipboard.writeText(document.getElementById('m_preview').innerText).then(() => showCopied('m_copyBtn'));
+  }
+}
+
+/* ========== 공통 ========== */
+function showCopied(btnId) {
+  const btn = document.getElementById(btnId);
+  btn.textContent = '복사됨 ✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '복사하기'; btn.classList.remove('copied'); }, 2000);
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select-wrapper')) {
+    const panel = document.getElementById('c_specialPanel');
+    const trigger = document.getElementById('c_specialTrigger');
+    if (panel) panel.classList.remove('open');
+    if (trigger) trigger.classList.remove('open');
+  }
+});
+
+c_update();
+m_update();
+</script>
+</body>
+</html>
